@@ -36,9 +36,9 @@
 
 .lib-search-input-wrapper {
     flex-grow: 1;
-    max-width: 450px;
+    max-width: 800px;
     position: relative;
-    background-color: var(--accent-light);
+    background-color: #fff;
     border-radius: 8px;
     padding: 12px 15px; 
     display: flex;
@@ -97,9 +97,9 @@
 }
 
 .lib-card {
-    background-color: var(--accent-light); 
+    background-color: #fff; 
     padding: 18px 25px;
-    border-radius: 12px;
+    border-radius: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;

@@ -11,7 +11,7 @@ namespace Memora.DTOs
 
         public string CreatedBy { get; set; } = string.Empty;
 
-        public string CreatedByUID { get; set; }
+        public string CreatedByUID { get; set; } = null!;
 
         [Required]
         public bool Visibility { get; set; } = false;

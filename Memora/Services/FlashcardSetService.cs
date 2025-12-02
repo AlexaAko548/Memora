@@ -192,5 +192,59 @@ namespace Memora.Services
 
             return cards;
         }
+
+        public async Task<bool> UpdateSetAsync(string setId, string userId, CreateFlashcardSetRequest request)
+        {
+            DocumentReference setDocRef = _setsCollection.Document(setId);
+            DocumentSnapshot snapshot = await setDocRef.GetSnapshotAsync();
+
+            if (!snapshot.Exists) return false;
+
+            FlashcardSet set = snapshot.ConvertTo<FlashcardSet>();
+            if (set.UserId != userId) return false;
+
+            var now = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc); // Safe UTC
+
+            var updates = new Dictionary<string, object?>
+            {
+                { "title", request.Title },
+                { "description", request.Description },
+                { "visibility", request.Visibility },
+                { "last_updated", now },
+                { "tag_ids", request.TagIds ?? new List<string>() }
+            };
+            await setDocRef.UpdateAsync(updates);
+
+            CollectionReference cardsCollection = setDocRef.Collection("cards");
+            QuerySnapshot existingCards = await cardsCollection.GetSnapshotAsync();
+            WriteBatch batch = _db.StartBatch();
+            
+            // Delete old cards
+            foreach (DocumentSnapshot cardDoc in existingCards.Documents)
+            {
+                batch.Delete(cardDoc.Reference);
+            }
+            
+            // Add new cards (even if list is larger/smaller than before)
+            if (request.Cards != null)
+            {
+                foreach (var cardDto in request.Cards)
+                {
+                    DocumentReference newCardRef = cardsCollection.Document();
+                    var newCard = new Flashcard
+                    {
+                        CardId = newCardRef.Id,
+                        Term = cardDto.Term,
+                        Definition = cardDto.Definition,
+                        ImageUrl = cardDto.ImageUrl,
+                        DateCreated = now
+                    };
+                    batch.Set(newCardRef, newCard);
+                }
+            }
+
+            await batch.CommitAsync();
+            return true;
+        }
     }
 }

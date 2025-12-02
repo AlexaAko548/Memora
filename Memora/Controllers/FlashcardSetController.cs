@@ -180,5 +180,24 @@ namespace Memora.Controllers
                 return StatusCode(500, new { message = "Failed to load cards.", error = ex.Message });
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateSet(string id, [FromBody] CreateFlashcardSetRequest request)
+        {
+            try
+            {
+                string? userId = await GetUserIdFromTokenAsync();
+                if (userId == null) return Unauthorized();
+
+                bool success = await _setService.UpdateSetAsync(id, userId, request);
+                if (!success) return NotFound("Set not found or you don't have permission.");
+
+                return Ok(new { message = "Set updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

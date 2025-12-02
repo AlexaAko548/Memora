@@ -8,7 +8,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link"; 
 
 import {
-  MoreVertical, Trash2, BookOpen, Clock, Search, Plus, Loader2, Calendar, FolderPlus, Folder, 
+  MoreVertical, Edit, Trash2, BookOpen, Clock, Search, Filter, Plus, Loader2, Calendar, FolderPlus, Folder, 
   FileText 
 } from "lucide-react";
 
@@ -169,6 +169,13 @@ export default function LibraryPage({ role = "student" }: LibraryPageProps) {
     else router.push("/create");
   };
 
+  const handleEdit = (id: string) => {
+    // Redirects to Create Page with ID (which acts as Edit Page)
+    if (role === "teacher") router.push(`/teacher-create?id=${id}`);
+    else router.push(`/create?id=${id}`);
+    setMenuOpen(null);
+  };
+
   const handleAddToFolderClick = (id: string) => {
     setSelectedDeckId(id);
     setIsAddToFolderOpen(true);
@@ -248,8 +255,6 @@ export default function LibraryPage({ role = "student" }: LibraryPageProps) {
             />
           </div>
 
-          {/* REMOVED: Search by Category Button */}
-
           {/* DYNAMIC CREATE BUTTON */}
           {activeTab === 'sets' ? (
             <button
@@ -318,7 +323,6 @@ export default function LibraryPage({ role = "student" }: LibraryPageProps) {
             {filteredSets.map((set) => (
               <div key={set.id} className="lib-card" onClick={() => {
                 if(menuOpen !== set.id) {
-                   // Dynamic Routing for Overview Page
                    const path = role === 'teacher' ? `/teacher-cardOverview?id=${set.id}` : `/overviewOfCards?id=${set.id}`;
                    router.push(path);
                 }
@@ -361,7 +365,14 @@ export default function LibraryPage({ role = "student" }: LibraryPageProps) {
                 <div className="lib-card-actions">
                   {menuOpen === set.id && (
                     <div className="lib-popup-menu-inline" onClick={e => e.stopPropagation()}>
-                      {/* REMOVED: Edit Button */}
+                      
+                      {/* ADDED EDIT BUTTON BACK */}
+                      <button
+                        className="lib-action-btn lib-edit-btn"
+                        onClick={(e) => { e.stopPropagation(); handleEdit(set.id); }}
+                      >
+                        <Edit size={16} /> Edit
+                      </button>
 
                       <button
                         className="lib-action-btn lib-folder-btn"
@@ -395,6 +406,12 @@ export default function LibraryPage({ role = "student" }: LibraryPageProps) {
         ) : (
           /* --- FOLDERS LIST --- */
           <div className="lib-list">
+            {filteredFolders.length === 0 && (
+              <div className="lib-empty">
+                No folder found. Create one to get started!
+              </div>
+            )}
+
             {folders.length === 0 ? (
               <div className="lib-empty">
                 No folders yet. 
@@ -412,7 +429,7 @@ export default function LibraryPage({ role = "student" }: LibraryPageProps) {
                     alignItems: 'center',
                     gap: '1rem',
                     padding: '1rem 1.2rem',
-                    borderRadius: '18px',
+                    borderRadius: '15px',
                     background: '#fff',
                     boxShadow: '0 4px 10px rgba(0, 0, 0, 0.04)',
                     transition: 'transform 0.2s ease, box-shadow 0.2s ease',

@@ -25,6 +25,9 @@ namespace Memora.Services
 
         // Get cards
         Task<List<Flashcard>> GetCardsForSetAsync(string setId);
+
+        // Update a flashcard set
+        Task<bool> UpdateSetAsync(string setId, string userId, CreateFlashcardSetRequest request);
         
     }
 }
